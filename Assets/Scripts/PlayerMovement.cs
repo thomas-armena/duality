@@ -18,6 +18,7 @@ public class PlayerMovement : NetworkBehaviour
     public GameObject camera;
 
     public NetworkVariable<Vector3> networkPosition = new NetworkVariable<Vector3>();
+    public NetworkVariable<Quaternion> networkQuaternion = new NetworkVariable<Quaternion>();
 
     public override void OnNetworkSpawn()
     {
@@ -42,24 +43,27 @@ public class PlayerMovement : NetworkBehaviour
             if (NetworkManager.Singleton.IsServer)
             {
                 networkPosition.Value = transform.position;
+                networkQuaternion.Value = transform.rotation;
             }
             else
             {
-                submitPositionServerRpc(transform.position);
+                submitPositionServerRpc(transform.position, transform.rotation);
             }
         } 
         else
         {
             transform.position = networkPosition.Value;
+            transform.rotation = networkQuaternion.Value;
         }
 
 
     }
 
     [ServerRpc]
-    void submitPositionServerRpc(Vector3 position)
+    void submitPositionServerRpc(Vector3 position, Quaternion rotation)
     {
         networkPosition.Value = position;
+        networkQuaternion.Value = rotation;
     }
 
     private void walk()
